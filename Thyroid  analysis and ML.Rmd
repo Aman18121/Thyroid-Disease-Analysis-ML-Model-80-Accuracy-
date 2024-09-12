@@ -1,0 +1,377 @@
+---
+title: "Thyroid Disease Analysis [ML Model 80% Accuracy]"
+author: "Aman Satyendra Yadav"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+# Introduction
+
+Hi, I am **Aman Yadav**, currently pursuing a Master’s degree in **Life Science Informatics** at the Technical University of Deggendorf, Germany. This project was undertaken independently as a personal hobby and is not associated with my university coursework.
+
+In this project, I conducted a comprehensive analysis of the Thyroid Disease Data (available at [**https://www.kaggle.com/datasets/jainaru/thyroid-disease-data/data**](https://www.kaggle.com/datasets/jainaru/thyroid-disease-data/data){.uri}). This dataset includes 13 clinicopathologic features and aims to predict the recurrence of well-differentiated thyroid cancer. The data was collected over 15 years, with each patient monitored for at least 10 years. The analysis involved data visualization and the development of a machine learning model.
+
+**Source**
+
+The data was procured from thyroid disease datasets provided by the UCI Machine Learning Repository.
+
+**Content** The size for the file featured within this Kaggle dataset is shown below — along with a list of attributes, and their description summaries:
+
+Age: The age of the patient at the time of diagnosis or treatment. Gender: The gender of the patient (male or female). Smoking: Whether the patient is a smoker or not. Hx Smoking: Smoking history of the patient (e.g., whether they have ever smoked). Hx Radiotherapy: History of radiotherapy treatment for any condition. Thyroid Function: The status of thyroid function, possibly indicating if there are any abnormalities. Physical Examination: Findings from a physical examination of the patient, which may include palpation of the thyroid gland and surrounding structures. Adenopathy: Presence or absence of enlarged lymph nodes (adenopathy) in the neck region. Pathology: Specific types of thyroid cancer as determined by pathology examination of biopsy samples. Focality: Whether the cancer is unifocal (limited to one location) or multifocal (present in multiple locations). Risk: The risk category of the cancer based on various factors, such as tumor size, extent of spread, and histological type. T: Tumor classification based on its size and extent of invasion into nearby structures. N: Nodal classification indicating the involvement of lymph nodes. M: Metastasis classification indicating the presence or absence of distant metastases. Stage: The overall stage of the cancer, typically determined by combining T, N, and M classifications. Response: Response to treatment, indicating whether the cancer responded positively, negatively, or remained stable after treatment. Recurred: Indicates whether the cancer has recurred after initial treatment.
+
+# Data summary
+
+```{r include=FALSE}
+options(repos = c(CRAN = "https://cran.r-project.org"))
+install.packages("dplyr")
+install.packages("readr")
+install.packages("gridExtra")
+library(gridExtra)
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+
+```{r}
+
+data <- read_csv("~/Thyroid_Diff.csv")
+summary(data)
+```
+
+# Analysis of Thyroid
+
+## Based on AGE
+
+Age is the primary factor in my analysis, and its impact can be better understood through a histogram plot. While thyroid disease can affect individuals of any age group, this dataset provides insights into which age groups are most commonly affected. The histogram allows us to visually observe the distribution of ages and identify the prevalence of thyroid disease across different age ranges. This approach not only highlights patterns within the data but also helps in determining whether specific age groups are more susceptible to thyroid disease recurrence.
+
+```{r Age plot}
+
+library(dplyr)
+library(ggplot2)
+
+
+data <- read_csv("~/Thyroid_Diff.csv")
+#View(data)
+
+
+
+data%>%
+ggplot(aes(x = Age)) + geom_histogram( binwidth = 2, fill = "red" , color = "black")+
+  xlim(10,85) +  geom_density(aes(y = 2 * ..count..), color = "black") +
+  labs(title = "Average Age class affected by Thyroid",
+  x = "Age",
+  y = "Count") + theme(panel.border = element_rect(color = "black", fill = NA , size = 1.5))
+
+```
+
+The analysis shows that the **30 to 35** age group is the most common in the thyroid disease dataset, indicating that individuals in this range are more susceptible. While the disease can affect any age, this group appears to be more vulnerable.
+
+## Based on Gender.
+
+In the gender analysis, I found that **females are significantly more susceptible to thyroid disease than males**, with a considerable difference between the two groups.
+
+```{r Gender Plot}
+
+data %>%
+  ggplot(aes(x = Gender, fill = Gender)) +
+  geom_bar(color = "black", size = 1) +  # Color the borders black and set their thickness
+  labs(title = "Gender Distribution",
+       x = "Sex",
+       y = "Count") +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 2.5))
+
+```
+
+**Here are more information to justify the data set**
+
+**Women** are more prone to thyroid diseases due to a combination of **hormonal, genetic, and autoimmune factor**s. One significant contributor is the role of **estrogen**, a female hormone that can influence thyroid function by enhancing the immune response. This heightened immune activity may increase the likelihood of autoimmune conditions like Hashimoto's thyroiditis, where the immune system mistakenly attacks the thyroid gland. Estrogen also affects the production of proteins that bind to thyroid hormones, potentially leading to hormonal imbalances.
+
+Additionally, women experience fluctuations in hormone levels during life stages like pregnancy, menopause, and puberty, which can further impact thyroid function. Autoimmune disorders, which are a major cause of thyroid issues, are more prevalent in women for reasons that may be linked to evolutionary biology and environmental factors.
+
+**The susceptibility of women to thyroid disorders is well-documented**, with studies indicating that they are up to 10 times more likely to develop such conditions than men​**(Mayo Clinic News Network)(India Today)(Modern Hypothyroid Care \| Paloma Health)**.
+
+## Smoking habits.
+
+Although smoking is widely recognized as harmful and contributes to many health problems, including lung cancer, the dataset suggests that smoking is not a significant risk factor for thyroid disease. This observation might be due to various factors, such as the limitations of the dataset, which may not fully capture the complex relationship between smoking and thyroid disease. It's also possible that the dataset does not include comprehensive data on other relevant health conditions or lifestyle factors. Therefore, while the dataset indicates no strong association between smoking and thyroid disease, smoking remains a well-established risk factor for numerous other serious health issues.
+
+```{r Smoking analysis}
+data %>%
+  ggplot(aes(x = Smoking, fill = Smoking)) +
+  geom_bar(color = "black", size = 1) +  # Color the borders black and set their thickness
+  labs(title = "Smoking ",
+       x = "Smoking",
+       y = "Count") +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 2.5))
+
+```
+
+## Smoking and Radiotherapy history.
+
+The analysis of smoking history and radiotherapy in relation to thyroid disease indicates that neither factor is directly associated with the disease. However, these factors can act as risk elements in certain cases, potentially contributing to thyroid disease under specific conditions or in conjunction with other risk factors.
+
+```{r Smoking and Radiotherapy history.}
+value_counts1 <- data %>%
+  filter(!is.na(`Hx Radiothreapy`)) %>% 
+  count(`Hx Radiothreapy`) %>%
+  mutate(percentage1 = round(n / sum(n) * 100, 1))
+value_counts1
+
+value_counts2 <- data %>%
+  filter(!is.na(`Hx Smoking`)) %>%  
+  count(`Hx Smoking`) %>%
+  mutate(percentage2 = round(n / sum(n) * 100, 1))
+value_counts2
+
+
+
+pichart1 <- value_counts1 %>%
+  ggplot(aes(x = "", y = n, fill = `Hx Radiothreapy`)) + 
+  geom_bar(stat = "identity", width = 1) + 
+  geom_text(aes(label = paste0(`Hx Radiothreapy`, ": ", percentage1, "%")),
+            position = position_stack(vjust = 0.5), size = 5, color = "white") +  
+  scale_fill_manual(values = c("#2ecc71", "#e67e22")) +  
+  coord_polar("y", start = 0) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    legend.position = "right",
+    legend.title = element_text(size = 14, face = "bold"),
+    legend.text = element_text(size = 12)
+  ) +
+  labs(fill = "Radiotherapy History", title = "Radiotherapy History Breakdown")
+
+
+
+
+pichart2 <- value_counts2 %>%
+  ggplot(aes(x = "", y = n, fill = `Hx Smoking`)) + 
+  geom_bar(stat = "identity", width = 1) + 
+  geom_text(aes(label = paste0(`Hx Smoking`, ": ", percentage2, "%")),
+            position = position_stack(vjust = 0.5), size = 5, color = "white") + 
+  scale_fill_manual(values = c("#3498db", "#e74c3c")) +
+  coord_polar("y", start = 0) +
+  theme_void() + 
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), 
+    legend.position = "right", 
+    legend.title = element_text(size = 14, face = "bold"),
+    legend.text = element_text(size = 12)
+  ) +
+  labs(fill = "Smoking History", title = "Smoking History Breakdown")
+
+grid.arrange(pichart2,pichart1, ncol =1 )
+
+```
+
+**Above 90% people didnt had any smoking or radiotherapy history**
+
+## Risk Distribution
+
+It's well-established that older individuals are generally more susceptible to a range of health issues, and this trend is evident in the analysis of thyroid disease risk as well. Using a violin plot (or diamond plot) to examine the risk distribution across different age groups in the dataset, it was observed that the risk of thyroid disease increases with age. This analysis supports the common understanding that age is a significant risk factor for thyroid disease, with older age groups showing higher risk levels.
+
+```{r Risk D}
+violonplot <- data%>%
+  ggplot(aes(x = Risk, y = Age, color = Risk)) +
+  geom_violin(trim = FALSE, alpha = 0.5) +  
+  stat_summary(fun = median, geom = "crossbar", aes(color = Risk), width = 0.5, size = 0.2)+
+  labs(title = "Risk Distribution")
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 2.5))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+violonplot
+```
+
+## Physical Examination
+
+Findings from a **physical examination** of the patient, which may include palpation of the thyroid gland and surrounding structures.
+
+**Palpation of the thyroid gland**: The doctor uses their hands to feel (palpate) the thyroid gland located in the front of the neck. This is done to check for:
+
+**Size**: An enlarged thyroid may indicate a condition such as goiter.
+
+**Texture**: The provider feels for any abnormalities like lumps or nodules, which could suggest thyroid disease or, in some cases, thyroid cancer.
+
+**Tenderness**: Pain or discomfort during palpation may point to inflammation, such as in thyroiditis.
+
+```{r Physical Examination}
+
+jitter <- data%>%
+  ggplot(aes(x = `Physical Examination`, y = Age, color = `Physical Examination`)) +
+  geom_jitter(size = 3, alpha = 0.5) +  
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 2.5))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+jitter
+
+
+
+```
+
+```{r Physical Examination pi}
+Valuecount3 <- data %>%
+  filter(!is.na(`Physical Examination`)) %>% 
+  count(`Physical Examination`) %>%
+  mutate(percentage1 = round(n / sum(n) * 100, 1))
+
+pichart3 <- Valuecount3 %>%
+  ggplot(aes(x = "", y = n, fill = `Physical Examination`)) +
+  geom_bar(stat = "identity", width = 1, color = "black") +  
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(`Physical Examination`, ": ", percentage1, "%")),
+            position = position_stack(vjust = 0.5),
+            size = 3,
+            color = "black",  
+            fontface = "bold") +  
+  scale_fill_manual(values = c("#3498db", "#e74c3c", "#f1c40f", "#2ecc71", "#9b59b6")) + 
+  theme_void() + 
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),  
+    legend.position = "right",  
+    legend.title = element_text(size = 8, face = "bold"),  
+    legend.text = element_text(size = 4),  
+    legend.key.size = unit(0.4, 'cm')  
+  ) +
+  labs(fill = "Physical Examination", title = "Physical Examination Pie Chart")
+pichart3
+
+```
+
+From the plot above, it is evident that the presence of **goiter** is a common finding among patients suffering from thyroid disease. This condition appears consistently across all age groups, **indicating that goiter may be a significant clinical sign regardless of the patient's age**. Although other factors may contribute to the disease, goiter remains a prevalent physical manifestation observed during diagnosis
+
+## Recurrance
+
+Even though our analysis shows that the treatment outcomes for most thyroid disease patients were **excellent**, the risk of **recurrence** remains a significant concern. Thyroid disease can resurface after a period of remission, making recurrence one of the most critical factors to consider in diagnosis and long-term management. Monitoring for recurrence is essential, as it can impact both **treatment plans and patient prognosis**. The plot below provides a clear insight into the prevalence of recurrence within our sample population, highlighting how common this issue is among patients despite initially successful treatments.
+
+```{r Recurrance}
+value_counts <- data %>%
+  count(Recurred) %>%
+  mutate(percentage = round(n / sum(n) * 100, 1))
+
+
+pichart3 <- value_counts %>%
+  ggplot(aes(x = "", y = n, fill = Recurred)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +  
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(Recurred, ": ", percentage, "%")),
+            position = position_stack(vjust = 0.5),
+            size = 6,
+            color = "white",  
+            fontface = "bold") +  
+  scale_fill_manual(values = c("#3498db", "#e74c3c")) + 
+  theme_void() + 
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),  
+    legend.position = "right",  
+    legend.title = element_text(size = 14, face = "bold"),  
+    legend.text = element_text(size = 12) 
+  ) +
+  labs(fill = "Recurred", title = "Recurred Pie Chart")
+
+pichart3
+
+```
+
+# Machine Learning Model.
+
+In this machine learning model, I used three independent variables—Age, Gender, and Risk—to predict recurrence. I chose a decision tree model due to the categorical nature of the dataset, which is well-suited for handling categorical variables and providing interpretable results.
+
+## Necesary libraries
+
+```{r Machine learning model (Libraries)}
+install.packages("rpart")
+install.packages("rpart.plot")  
+install.packages("caret")       
+install.packages("nnet")  
+
+library(rpart)
+library(rpart.plot)
+library(caret)
+library(nnet)
+
+```
+
+## Seting X and Y variable.
+
+here our X variable will be Gender + Age + Risk Y variable is Recurrence. **rpart()** Function: Builds the decision tree model.
+
+```{r Variables }
+
+set.seed(123)  # for reproducibility
+tree_model <- rpart(Recurred ~ Gender + Age + Risk , data = data, method = "class")
+summary(tree_model)
+
+```
+
+We can also visualize our decision tree accordding to the following variables. The code below mentions the same
+
+```{r Desicion tree visualization }
+rpart.plot(tree_model, extra = 104, under = TRUE, faclen = 0, main = "Decision Tree for Recurred")
+```
+
+## Splitin the Data.
+
+It is very important to split the data in test and training set in 8:2 ratio before training the model. The testing dataset will be used latter to find the accuracy of our Machine learning model.
+
+```{r Data Spliting }
+
+set.seed(123)  
+train_index <- createDataPartition(data$Recurred, p = 0.8, list = FALSE)
+train_data <- data[train_index, ]
+test_data <- data[-train_index, ]
+test_data$Recurred <- as.factor(test_data$Recurred)
+
+```
+
+\*\*train_index \<- createDataPartition(data$Recurred, p = 0.8, list = FALSE)** this function will create an index for splitting the data into training (80%) and testing (20%) sets based on the Recurred variable. and **test_data$Recurred \<- as.factor(test_data\$Recurred) make sure that variable of test set are considered as a factor for our prefiction.
+
+## Model Building
+
+**After preparing the Data we are ready to build the model by putting everything together.**
+
+```{r Building Model }
+tree_model <- rpart(Recurred ~ Gender + Age + Risk, data = train_data, method = "class")
+predictions <- predict(tree_model, newdata = test_data, type = "class")
+
+
+confusionMatrix(predictions, test_data$Recurred)
+
+
+```
+
+The confusion matrix provides a summary of the classification performance of the model. In this case, the confusion matrix shows how the model's predictions compare to the actual values for the test data:
+
+True Negatives (No predicted as No): 48 False Positives (Yes predicted as No): 5 False Negatives (No predicted as Yes): 7 True Positives (Yes predicted as Yes): 16 **Accuracy**: The model correctly predicted the outcome for approximately 84.21% of the cases. This metric provides a general measure of how well the model performs overall.
+
+**95% Confidence Interval for Accuracy**: The accuracy estimate is between 74.04% and 91.57%. This range reflects the uncertainty in the accuracy estimate due to sample variability.
+
+**No Information Rate (NIR)**: This value of 72.37% represents the accuracy that could be achieved by always predicting the most frequent class. The model's accuracy is significantly higher than this baseline.
+
+**P-Value [Acc \> NIR]**: The p-value of 0.01146 indicates that the model's accuracy is statistically significantly better than what would be achieved by random guessing.
+
+**Kappa**: The kappa statistic of 0.6165 measures the agreement between the predicted and actual classifications, accounting for chance. A value of 0.6165 suggests substantial agreement beyond what would be expected by chance.
+
+**Mcnemar's Test P-Value**: The p-value of 0.77283 for McNemar's test assesses whether the proportion of errors is significantly different between the two classes. A high p-value suggests that the error rates for the two classes are not significantly different.
+
+**Sensitivity**: The sensitivity of 87.27% indicates the model's ability to correctly identify positive cases (Yes). In other words, it successfully identifies 87.27% of the actual positive cases.
+
+**Specificity**: The specificity of 76.19% measures how well the model identifies negative cases (No). It correctly identifies 76.19% of the actual negative cases.
+
+**Positive Predictive Value (PPV)**: The PPV of 90.57% indicates the proportion of positive predictions that are actually correct. This high value suggests that when the model predicts a positive outcome, it is usually correct.
+
+**Negative Predictive Value (NPV)**: The NPV of 69.57% shows the proportion of negative predictions that are accurate. This indicates that when the model predicts a negative outcome, it is correct 69.57% of the time.
+
+**Prevalence**: The prevalence of 72.37% represents the proportion of actual positive cases in the dataset. This high prevalence indicates that positive cases are common in the test set.
+
+**Detection Rate**: The detection rate of 63.16% measures the proportion of actual positives that are correctly identified. It shows that the model detects 63.16% of the actual positive cases.
+
+**Detection Prevalence**: The detection prevalence of 69.74% represents the proportion of predicted positives out of all predictions. This indicates that the model predicts 69.74% of cases as positive.
+
+**Balanced Accuracy**: The balanced accuracy of 81.73% is the average of sensitivity and specificity. This metric provides a balanced measure of performance, considering both positive and negative cases.
+
+**'Positive' Class**: In this analysis, "No" is considered the positive class. This means the model's performance metrics are reported with respect to predicting "No" as the positive outcome.
+
+
+#END
